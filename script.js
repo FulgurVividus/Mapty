@@ -23,6 +23,60 @@ const inputDuration = document.querySelector(".form__input--duration");
 const inputCadence = document.querySelector(".form__input--cadence");
 const inputElevation = document.querySelector(".form__input--elevation");
 
+//# Managing workout data: Creating
+class Workout {
+  date = new Date();
+  // to make unique ids, take the last 10 chars of Date
+  id = String(Date.now()).slice(-10);
+
+  constructor(coords, distance, duration) {
+    this.coords = coords; // [lat, lng]
+    this.distance = distance; // in km
+    this.duration = duration; // in min
+  }
+}
+
+//# Running child class of Workout
+class Running extends Workout {
+  constructor(coords, distance, duration, cadence) {
+    super(coords, distance, duration);
+    this.cadence = cadence;
+    // calling right away this method
+    this.calcPace();
+  }
+
+  calcPace() {
+    // min / km
+    this.pace = this.duration / this.distance;
+    return this.pace;
+  }
+}
+
+//# Cycling child class of Workout
+class Cycling extends Workout {
+  constructor(coords, distance, duration, elevationGain) {
+    super(coords, distance, duration);
+    this.elevationGain = elevationGain;
+    // calling right away this method
+    this.calcSpeed();
+  }
+
+  calcSpeed() {
+    // km/h
+    this.speed = this.distance / (this.duration / 60);
+    return this.speed;
+  }
+}
+
+//# Testing the child classes
+// const run1 = new Running([39, -12], 5.2, 24, 178);
+// const cycle1 = new Cycling([39, -12], 27, 95, 523);
+// console.log(run1);
+// console.log(cycle1);
+
+/////////////////////////////////////////////////////////////////////////////
+
+//# Application Architecture
 class App {
   #map;
   #mapEvent;
@@ -31,10 +85,10 @@ class App {
     // will be called right away when the page loads
     this.#getPosition();
 
-    //# event for submitting
+    // event for submitting
     form.addEventListener("submit", this.#newWorkout.bind(this));
 
-    //# event for change in option choice
+    // event for change in option choice
     inputType.addEventListener("change", this.#toggleElevationField);
   }
 
@@ -46,7 +100,7 @@ class App {
   }
 
   #getPosition() {
-    //# Implementing geo-location API
+    // Implementing geo-location API
     //? accepts 2 parameters: success and error functions
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
