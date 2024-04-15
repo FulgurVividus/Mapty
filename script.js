@@ -101,8 +101,11 @@ class App {
   #workouts = [];
 
   constructor() {
-    // will be called right away when the page loads
+    // will be called right away when the page loads, user's position
     this.#getPosition();
+
+    // get data from local storage
+    this.#getLocalStorage();
 
     // event for submitting
     form.addEventListener("submit", this.#newWorkout.bind(this));
@@ -157,6 +160,11 @@ class App {
     //? event handler for pointing on the map, ".on()" comes from Leaflet
     //? mapE = event, handling clicks on the map
     this.#map.on("click", this.#showForm.bind(this));
+
+    // render the markers after the map loads
+    this.#workouts.forEach((work) => {
+      this.#renderWorkoutMarker(work);
+    });
   }
 
   #showForm(mapE) {
@@ -233,7 +241,7 @@ class App {
 
     // Add new object to workout array
     this.#workouts.push(workout);
-    console.log(workout);
+    // console.log(workout);
 
     // Render workout on map as marker
     this.#renderWorkoutMarker(workout);
@@ -244,6 +252,9 @@ class App {
     // Hide form + Clear input fields
     // this.clearInputs();
     this.#hideForm();
+
+    // set local storage to all workouts
+    this.#setLocalStorage();
   }
 
   #renderWorkoutMarker(workout) {
@@ -340,7 +351,39 @@ class App {
     });
 
     // using the public interface
-    workout.click();
+    // workout.click();
+  }
+
+  // setting local storage
+  #setLocalStorage() {
+    // local storage is simple API, and better for small amount of data
+    // accepts 2 params, 1st is key and 2nd is value
+    localStorage.setItem("workouts", JSON.stringify(this.#workouts));
+  }
+
+  // retrieving data from local storage
+  #getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem("workouts"));
+    // console.log(data);
+
+    if (!data) {
+      return;
+    }
+
+    // restore the data
+    this.#workouts = data;
+
+    // render these saved data
+    this.#workouts.forEach((work) => {
+      this.#renderWorkout(work);
+    });
+  }
+
+  // deleting data from local storage
+  reset() {
+    localStorage.removeItem("workouts");
+    // location - a big object with different methods in the browser
+    location.reload();
   }
 }
 
